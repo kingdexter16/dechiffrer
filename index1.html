@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Décodeur de César</title>
+        <link rel="stylesheet" href="style.css" />
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 50px;
+            background-image: url('https://sdmntprcentralus.oaiusercontent.com/files/00000000-9418-71f5-b588-e7e894f0dd40/raw?se=2026-01-22T18%3A12%3A10Z&sp=r&sv=2024-08-04&sr=b&scid=16680fb7-0e60-433d-a52f-e3702ff3dd9b&skoid=864daabb-d06a-46b3-a747-d35075313a83&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2026-01-22T17%3A41%3A37Z&ske=2026-01-23T17%3A41%3A37Z&sks=b&skv=2024-08-04&sig=2ZeVUq%2BuAaq2iO/uXWJjrBX2cCtxTDSAgrvm7aJY5Ao%3D');
+            background-size: cover;
+            background-position: center;
+        }
+        textarea { width: 80%; height: 100px; margin-bottom: 10px;
+        color: aqua; }
+        button { padding: 10px; margin: 10px; cursor: pointer; 
+        color: black;}
+        .result { margin-top: 20px; white-space: pre-wrap; 
+        color: aqua;}
+        d1{
+            padding: 10px; margin: 10px; cursor: pointer; 
+        color: white;
+        }
+
+    </style>
+</head>
+<body>
+ <d1>
+    <h2>Décodeur de Chiffrement de César</h2>
+    <label for="decalage">Décalage/Clé (nombre) :</label>
+    <input type="number" id="decalage" value="3" min="1" max="127"><br>
+
+    <label><input type="radio" name="alphabet" value="fr" checked> Utiliser l'alphabet français (26 lettres de A à Z)</label><br>
+    <label><input type="radio" name="alphabet" value="fr_digits"> Utiliser l'alphabet français et décaler aussi les chiffres 0-9</label><br>
+    <label><input type="radio" name="alphabet" value="latin"> Utiliser l'alphabet latin du temps de César (23 lettres, ni J, ni U, ni W)</label><br>
+    <label><input type="radio" name="alphabet" value="ascii"> Utiliser la table ASCII (0-127) comme alphabet</label><br>
+    <label><input type="radio" name="alphabet" value="custom"> Utiliser un alphabet personnalisé</label><br>
+    <textarea id="inputText" placeholder="Entrez le texte ici..."></textarea><br>
+    <button onclick="chiffrerCesar()">Chiffrer</button>
+    <button onclick="decodeCesar()">Déchiffrer</button>
+    <div class="result" id="output"></div>
+</d1>
+    <script>
+        function cesar(texte, decalage, dechiffrement = false) {
+            let alphabetType = document.querySelector('input[name="alphabet"]:checked').value;
+            let decal = dechiffrement ? -decalage : decalage;
+            return texte.split('').map(char => {
+                if (alphabetType === "fr" && char.match(/[a-zA-Z]/)) {
+                    let base = char === char.toUpperCase() ? 65 : 97;
+                    return String.fromCharCode((char.charCodeAt(0) - base + decal + 26) % 26 + base);
+                } else if (alphabetType === "fr_digits" && char.match(/[a-zA-Z0-9]/)) {
+                    let base = char.match(/[A-Z]/) ? 65 : char.match(/[a-z]/) ? 97 : 48;
+                    let range = char.match(/[0-9]/) ? 10 : 26;
+                    return String.fromCharCode((char.charCodeAt(0) - base + decal + range) % range + base);
+                } else if (alphabetType === "latin" && char.match(/[A-Z]/)) {
+                    let alphabet = "ABCDEFGHIKLMNOPQRSTVXYZ";
+                    let index = alphabet.indexOf(char.toUpperCase());
+                    if (index !== -1) {
+                        return alphabet[(index + decal + 23) % 23];
+                    }
+                } else if (alphabetType === "ascii" && char.charCodeAt(0) >= 0 && char.charCodeAt(0) <= 127) {
+                    return String.fromCharCode((char.charCodeAt(0) + decal + 128) % 128);
+                }
+                return char;
+            }).join('');
+        }
+
+        function chiffrerCesar() {
+            let texte = document.getElementById("inputText").value;
+            let decalage = parseInt(document.getElementById("decalage").value);
+            document.getElementById("output").innerText = cesar(texte, decalage, false);
+        }
+
+        function decodeCesar() {
+            let texte = document.getElementById("inputText").value;
+            let decalage = parseInt(document.getElementById("decalage").value);
+            document.getElementById("output").innerText = cesar(texte, decalage, true);
+        }
+    </script>
+</body>
+</html>
